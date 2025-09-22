@@ -1,103 +1,137 @@
-import Image from "next/image";
+'use client'
+
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useAuth } from '@/contexts/AuthContext'
+import { blogPosts } from '@/lib/supabase-utils'
+import { BlogPost } from '@/types/database'
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [posts, setPosts] = useState<BlogPost[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const { user } = useAuth()
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    loadPosts()
+  }, [])
+
+  const loadPosts = async () => {
+    setLoading(true)
+    const { data, error } = await blogPosts.getAll()
+    
+    if (error) {
+      setError(error.message)
+    } else {
+      // Filter to show only published posts for non-authenticated users
+      const filteredPosts = user ? (data || []) : (data || []).filter(post => post.published)
+      setPosts(filteredPosts)
+    }
+    
+    setLoading(false)
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-900">Simple Blog</h1>
+            <nav className="flex space-x-4">
+              {user ? (
+                <>
+                  <Link 
+                    href="/auth" 
+                    className="text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    My Profile
+                  </Link>
+                  <Link 
+                    href="/create-post" 
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  >
+                    Create Post
+                  </Link>
+                </>
+              ) : (
+                <Link 
+                  href="/auth" 
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Admin Login
+                </Link>
+              )}
+            </nav>
+          </div>
         </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Latest Articles</h2>
+          <p className="text-gray-600">
+            Discover interesting articles and insights from our authors.
+          </p>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            Error loading posts: {error}
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">No Posts Yet</h3>
+            <p className="text-gray-500 mb-4">Be the first to create a blog post!</p>
+            {user && (
+              <Link 
+                href="/create-post"
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+              >
+                Create Your First Post
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {posts.map((post) => (
+              <article key={post.id} className="bg-white p-6 rounded-lg shadow-md border hover:shadow-lg transition-shadow">
+                <h3 className="text-xl font-semibold mb-3 text-gray-900">
+                  {post.title}
+                </h3>
+                <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+                  {post.content.substring(0, 200)}
+                  {post.content.length > 200 && '...'}
+                </p>
+                <div className="flex justify-between items-center text-sm text-gray-500">
+                  <span>
+                    Published on {new Date(post.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                    {post.author?.email && (
+                      <span className="ml-2">
+                        by {post.author.email.split('@')[0]}
+                      </span>
+                    )}
+                  </span>
+                  {!post.published && user && (
+                    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                      Draft
+                    </span>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
-  );
+  )
 }
