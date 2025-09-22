@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { blogPosts } from '@/lib/supabase-utils'
@@ -12,11 +12,7 @@ export default function Home() {
   const [error, setError] = useState('')
   const { user } = useAuth()
 
-  useEffect(() => {
-    loadPosts()
-  }, [])
-
-  const loadPosts = async () => {
+  const loadPosts = useCallback(async () => {
     setLoading(true)
     const { data, error } = await blogPosts.getAll()
     
@@ -29,7 +25,11 @@ export default function Home() {
     }
     
     setLoading(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    loadPosts()
+  }, [loadPosts])
 
   return (
     <div className="min-h-screen bg-gray-50">

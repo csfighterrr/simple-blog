@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { Session } from '@supabase/supabase-js'
 
 // Authentication functions
 export const auth = {
@@ -33,7 +34,7 @@ export const auth = {
   },
 
   // Listen to auth state changes
-  onAuthStateChange: (callback: (event: string, session: any) => void) => {
+  onAuthStateChange: (callback: (event: string, session: Session | null) => void) => {
     return supabase.auth.onAuthStateChange(callback)
   }
 }
@@ -91,7 +92,7 @@ export const blogPosts = {
 // Generic database functions
 export const database = {
   // Generic select function
-  select: async (table: string, columns: string = '*', filters?: Record<string, any>) => {
+  select: async (table: string, columns: string = '*', filters?: Record<string, unknown>) => {
     let query = supabase.from(table).select(columns)
     
     if (filters) {
@@ -105,7 +106,7 @@ export const database = {
   },
 
   // Generic insert function
-  insert: async (table: string, data: Record<string, any>) => {
+  insert: async (table: string, data: Record<string, unknown>) => {
     const { data: result, error } = await supabase
       .from(table)
       .insert([data])
@@ -114,7 +115,7 @@ export const database = {
   },
 
   // Generic update function
-  update: async (table: string, id: string, updates: Record<string, any>) => {
+  update: async (table: string, id: string, updates: Record<string, unknown>) => {
     const { data, error } = await supabase
       .from(table)
       .update(updates)

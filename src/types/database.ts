@@ -32,7 +32,7 @@ export interface Comment {
 // API response types
 export interface ApiResponse<T> {
   data: T | null
-  error: any
+  error: Error | null
 }
 
 // Form types

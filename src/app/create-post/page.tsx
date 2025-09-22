@@ -59,7 +59,7 @@ export default function CreatePost() {
         // Redirect to home page after successful creation
         router.push('/')
       }
-    } catch (err: any) {
+    } catch {
       setError('An unexpected error occurred')
     }
     
