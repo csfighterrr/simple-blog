@@ -69,13 +69,13 @@ export const profiles = {
 
 // Database functions for blog posts
 export const blogPosts = {
-  // Get all blog posts with author profiles (trying automatic relationship detection)
+  // Get all blog posts with author profiles (using proper foreign key relationship)
   getAll: async () => {
     const { data, error } = await supabase
       .from('posts')
       .select(`
         *,
-        profiles(
+        profiles!posts_author_id_profiles_fkey(
           id,
           display_name,
           avatar_url
@@ -85,13 +85,57 @@ export const blogPosts = {
     return { data, error }
   },
 
-  // Get a single blog post by ID (trying automatic relationship detection)
+  // Fallback method using separate queries (use this if the foreign key approach doesn't work)
+  getAllFallback: async () => {
+    // First get all posts
+    const { data: posts, error: postsError } = await supabase
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (postsError) {
+      return { data: null, error: postsError }
+    }
+
+    if (!posts || posts.length === 0) {
+      return { data: [], error: null }
+    }
+
+    // Get all unique author IDs
+    const authorIds = [...new Set(posts.map(post => post.author_id))]
+
+    // Get all profiles for these authors
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, display_name, avatar_url')
+      .in('id', authorIds)
+
+    if (profilesError) {
+      return { data: null, error: profilesError }
+    }
+
+    // Create a map of profiles by ID for quick lookup
+    const profileMap = new Map()
+    profiles?.forEach(profile => {
+      profileMap.set(profile.id, profile)
+    })
+
+    // Combine posts with their author profiles
+    const postsWithProfiles = posts.map(post => ({
+      ...post,
+      profiles: profileMap.get(post.author_id) || null
+    }))
+
+    return { data: postsWithProfiles, error: null }
+  },
+
+  // Get a single blog post by ID (using proper foreign key relationship)
   getById: async (id: string) => {
     const { data, error } = await supabase
       .from('posts')
       .select(`
         *,
-        profiles(
+        profiles!posts_author_id_profiles_fkey(
           id,
           display_name,
           avatar_url,
@@ -101,6 +145,43 @@ export const blogPosts = {
       .eq('id', id)
       .single()
     return { data, error }
+  },
+
+  // Fallback method for getById using separate queries
+  getByIdFallback: async (id: string) => {
+    // First get the post
+    const { data: post, error: postError } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (postError) {
+      return { data: null, error: postError }
+    }
+
+    if (!post) {
+      return { data: null, error: null }
+    }
+
+    // Get the author's profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, display_name, avatar_url, bio')
+      .eq('id', post.author_id)
+      .single()
+
+    if (profileError) {
+      return { data: null, error: profileError }
+    }
+
+    // Combine post with author profile
+    const postWithProfile = {
+      ...post,
+      profiles: profile || null
+    }
+
+    return { data: postWithProfile, error: null }
   },
 
   // Create a new blog post

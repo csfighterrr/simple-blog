@@ -6,6 +6,16 @@ export interface User {
   updated_at: string
 }
 
+export interface Profile {
+  id: string
+  display_name: string | null
+  bio: string | null
+  avatar_url: string | null
+  website: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface BlogPost {
   id: string
   title: string
@@ -18,6 +28,7 @@ export interface BlogPost {
     id: string
     email: string
   }
+  profile?: Profile
 }
 
 export interface Comment {
@@ -45,6 +56,7 @@ export interface SignUpForm {
   email: string
   password: string
   confirmPassword: string
+  displayName?: string
 }
 
 export interface PostForm {

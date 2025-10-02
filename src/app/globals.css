@@ -1,26 +1,122 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Primary Colors */
+    --primary-black: 240 3% 4%;           /* #0A0A0B */
+    --primary-white: 0 0% 98%;            /* #FAFAFA */
+    --accent-gold: 43 77% 38%;            /* #B8860B */
+    
+    /* Secondary Colors */
+    --charcoal: 240 3% 18%;               /* #2C2C2E */
+    --stone-gray: 220 9% 46%;             /* #6B7280 */
+    --light-gray: 220 13% 91%;            /* #E5E7EB */
+    --whisper-gray: 210 20% 98%;          /* #F9FAFB */
+    
+    /* Functional Colors */
+    --link-blue: 221 83% 53%;             /* #2563EB */
+    --link-hover: 221 83% 48%;            /* #1D4ED8 */
+    --success-green: 160 84% 39%;         /* #059669 */
+    --warning-amber: 25 95% 43%;          /* #D97706 */
+    --error-red: 0 72% 51%;               /* #DC2626 */
+    
+    /* Semantic tokens for components */
+    --background: var(--primary-white);
+    --foreground: var(--primary-black);
+    
+    --card: var(--primary-white);
+    --card-foreground: var(--primary-black);
+    
+    --popover: var(--primary-white);
+    --popover-foreground: var(--primary-black);
+    
+    --primary: var(--primary-black);
+    --primary-foreground: var(--primary-white);
+    
+    --secondary: var(--whisper-gray);
+    --secondary-foreground: var(--charcoal);
+    
+    --muted: var(--whisper-gray);
+    --muted-foreground: var(--stone-gray);
+    
+    --accent: var(--accent-gold);
+    --accent-foreground: var(--primary-white);
+    
+    --destructive: var(--error-red);
+    --destructive-foreground: var(--primary-white);
+    
+    --border: var(--light-gray);
+    --input: var(--light-gray);
+    --ring: var(--primary-black);
+    
+    --radius: 0.5rem;
+    
+    /* Spacing system */
+    --space-1: 0.5rem;   /* 8px */
+    --space-2: 1rem;     /* 16px */
+    --space-3: 1.5rem;   /* 24px */
+    --space-4: 2rem;     /* 32px */
+    --space-5: 2.5rem;   /* 40px */
+    --space-6: 3rem;     /* 48px */
+    --space-8: 4rem;     /* 64px */
+    --space-10: 5rem;    /* 80px */
+    --space-12: 6rem;    /* 96px */
+    --space-16: 8rem;    /* 128px */
+  }
+
+  .dark {
+    --background: 240 6% 6%;              /* #0F0F10 */
+    --foreground: 240 5% 90%;             /* #E5E5E7 */
+    --card: 240 4% 10%;                   /* #1A1A1B */
+    --card-foreground: 240 5% 90%;
+    --popover: 240 4% 10%;
+    --popover-foreground: 240 5% 90%;
+    --primary: 240 5% 90%;
+    --primary-foreground: 240 6% 6%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 240 5% 90%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 3% 67%;       /* #A1A1AA */
+    --accent: 43 77% 52%;                 /* Adjusted gold for dark mode */
+    --accent-foreground: 240 6% 6%;
+    --destructive: var(--error-red);
+    --destructive-foreground: 240 5% 90%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 240 5% 84%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-body), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading), Georgia, serif;
+    font-weight: 600;
+  }
+  
+  /* Reading optimizations */
+  article {
+    font-size: 1.125rem;
+    line-height: 1.75;
+  }
+  
+  /* Smooth transitions */
+  a, button {
+    transition: all 0.2s ease;
+  }
 }

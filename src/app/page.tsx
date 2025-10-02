@@ -1,10 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { blogPosts } from '@/lib/supabase-utils'
 import { BlogPost } from '@/types/database'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import ArticleCard from '@/components/ArticleCard'
+import NewsletterCTA from '@/components/NewsletterCTA'
 
 export default function Home() {
   const [posts, setPosts] = useState<BlogPost[]>([])
@@ -31,107 +34,114 @@ export default function Home() {
     loadPosts()
   }, [loadPosts])
 
+  const featuredPost = posts[0]
+  const recentPosts = posts.slice(1, 7)
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Simple Blog</h1>
-            <nav className="flex space-x-4">
-              {user ? (
-                <>
-                  <Link 
-                    href="/auth" 
-                    className="text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    My Profile
-                  </Link>
-                  <Link 
-                    href="/create-post" 
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                  >
-                    Create Post
-                  </Link>
-                </>
-              ) : (
-                <Link 
-                  href="/auth" 
-                  className="text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Admin Login
-                </Link>
-              )}
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Latest Articles</h2>
-          <p className="text-gray-600">
-            Discover interesting articles and insights from our authors.
-          </p>
-        </div>
-
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <main className="pt-20">
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="container mx-auto px-4 lg:px-8 py-16">
+            <div className="flex justify-center items-center py-24">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+            </div>
           </div>
         ) : error ? (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            Error loading posts: {error}
+          <div className="container mx-auto px-4 lg:px-8 py-16">
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-6 py-4 rounded-lg max-w-2xl mx-auto">
+              <h3 className="font-semibold mb-1">Error Loading Posts</h3>
+              <p>{error}</p>
+            </div>
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">No Posts Yet</h3>
-            <p className="text-gray-500 mb-4">Be the first to create a blog post!</p>
-            {user && (
-              <Link 
-                href="/create-post"
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
-              >
-                Create Your First Post
-              </Link>
-            )}
+          <div className="container mx-auto px-4 lg:px-8 py-16">
+            <div className="text-center py-24">
+              <h2 className="text-4xl lg:text-6xl font-heading font-bold mb-6">
+                Welcome to Simple Blog
+              </h2>
+              <p className="text-xl lg:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                A sophisticated platform for sharing thoughts, ideas, and insights. 
+                The first posts are waiting to be created.
+              </p>
+              {user && (
+                <a 
+                  href="/create-post"
+                  className="inline-block bg-accent text-accent-foreground px-8 py-4 rounded-lg hover:bg-accent/90 transition-colors font-semibold text-lg"
+                >
+                  Create Your First Post
+                </a>
+              )}
+            </div>
           </div>
         ) : (
-          <div className="space-y-6">
-            {posts.map((post) => (
-              <article key={post.id} className="bg-white p-6 rounded-lg shadow-md border hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-semibold mb-3 text-gray-900">
-                  {post.title}
-                </h3>
-                <p className="text-gray-600 mb-4 line-clamp-3 leading-relaxed">
-                  {post.content.substring(0, 200)}
-                  {post.content.length > 200 && '...'}
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>
-                    Published on {new Date(post.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                    {post.author?.email && (
-                      <span className="ml-2">
-                        by {post.author.email.split('@')[0]}
-                      </span>
-                    )}
-                  </span>
-                  {!post.published && user && (
-                    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
-                      Draft
-                    </span>
+          <>
+            {/* Hero Section with Featured Post */}
+            {featuredPost && (
+              <section className="container mx-auto px-4 lg:px-8 py-8 lg:py-12">
+                <ArticleCard post={featuredPost} featured />
+              </section>
+            )}
+
+            {/* Recent Articles Grid */}
+            {recentPosts.length > 0 && (
+              <section className="container mx-auto px-4 lg:px-8 py-12 lg:py-16">
+                <div className="flex items-center justify-between mb-8 lg:mb-12">
+                  <h2 className="text-3xl lg:text-4xl font-heading font-bold">
+                    Recent Stories
+                  </h2>
+                  {posts.length > 6 && (
+                    <a
+                      href="#"
+                      className="text-accent hover:text-accent/80 font-medium transition-colors"
+                    >
+                      View All →
+                    </a>
                   )}
                 </div>
-              </article>
-            ))}
-          </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                  {recentPosts.map((post) => (
+                    <ArticleCard key={post.id} post={post} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Newsletter CTA */}
+            <section className="container mx-auto px-4 lg:px-8">
+              <NewsletterCTA />
+            </section>
+
+            {/* Category Showcases */}
+            <section className="container mx-auto px-4 lg:px-8 py-12 lg:py-16">
+              <h2 className="text-3xl lg:text-4xl font-heading font-bold mb-8 lg:mb-12">
+                Explore by Category
+              </h2>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
+                {['Technology', 'Design', 'Culture', 'Ideas'].map((category) => (
+                  <a
+                    key={category}
+                    href="#"
+                    className="group relative h-48 lg:h-64 rounded-lg overflow-hidden shadow-card hover:shadow-card-hover transition-all"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-primary/20 group-hover:from-accent/30 group-hover:to-primary/30 transition-colors" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <h3 className="text-2xl lg:text-3xl font-heading font-bold text-foreground group-hover:text-accent transition-colors">
+                        {category}
+                      </h3>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </section>
+          </>
         )}
       </main>
+
+      <Footer />
     </div>
   )
 }
