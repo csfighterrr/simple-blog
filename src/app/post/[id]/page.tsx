@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Calendar, User } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowLeft, Clock, Calendar, User, Edit } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 import { blogPosts } from '@/lib/supabase-utils'
 import { BlogPost } from '@/types/database'
 import Header from '@/components/Header'
@@ -13,6 +15,7 @@ export default function PostPage() {
   const [post, setPost] = useState<BlogPost | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { user } = useAuth()
   const params = useParams()
   const postId = params.id as string
 
@@ -24,7 +27,7 @@ export default function PostPage() {
       if (error) {
         setError(error.message)
       } else {
-        setPost(data)
+        setPost(data as BlogPost)
       }
       
       setLoading(false)
@@ -100,13 +103,25 @@ export default function PostPage() {
       <main className="pt-20">
         {/* Back Navigation */}
         <div className="container mx-auto px-4 lg:px-8 py-8">
-          <Link 
-            href="/"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to All Posts
-          </Link>
+          <div className="flex justify-between items-center">
+            <Link 
+              href="/"
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to All Posts
+            </Link>
+            
+            {user && post && user.id === post.author_id && (
+              <Link
+                href={`/edit-post/${postId}`}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                <Edit className="h-4 w-4" />
+                Edit Post
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Article Header */}
@@ -138,15 +153,26 @@ export default function PostPage() {
               </div>
             </div>
 
-            {/* Featured Image Placeholder */}
-            <div className="aspect-video bg-gradient-to-br from-accent/20 to-primary/20 rounded-lg mb-8 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-accent/30 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <div className="w-8 h-8 bg-accent/50 rounded-full"></div>
-                </div>
-                <p className="text-muted-foreground">Featured Image</p>
+            {/* Featured Image */}
+            {post.image_url ? (
+              <div className="aspect-video rounded-lg mb-8 overflow-hidden relative">
+                <Image 
+                  src={post.image_url} 
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                />
               </div>
-            </div>
+            ) : (
+              <div className="aspect-video bg-gradient-to-br from-accent/20 to-primary/20 rounded-lg mb-8 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-accent/30 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <div className="w-8 h-8 bg-accent/50 rounded-full"></div>
+                  </div>
+                  <p className="text-muted-foreground">No Featured Image</p>
+                </div>
+              </div>
+            )}
           </header>
 
           {/* Article Content */}

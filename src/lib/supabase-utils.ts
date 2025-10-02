@@ -104,7 +104,7 @@ export const blogPosts = {
   },
 
   // Create a new blog post
-  create: async (post: { title: string; content: string; author_id: string; published?: boolean }) => {
+  create: async (post: { title: string; content: string; author_id: string; published?: boolean; image_url?: string }) => {
     const { data, error } = await supabase
       .from('posts')
       .insert([post])
@@ -113,7 +113,7 @@ export const blogPosts = {
   },
 
   // Update a blog post
-  update: async (id: string, updates: Partial<{ title: string; content: string; published: boolean }>) => {
+  update: async (id: string, updates: Partial<{ title: string; content: string; published: boolean; image_url: string }>) => {
     const { data, error } = await supabase
       .from('posts')
       .update(updates)
@@ -173,6 +173,33 @@ export const database = {
       .from(table)
       .delete()
       .eq('id', id)
+    return { error }
+  }
+}
+
+// Storage functions for file uploads
+export const storage = {
+  // Upload an image to Supabase storage
+  uploadImage: async (file: File, path: string) => {
+    const { data, error } = await supabase.storage
+      .from('post-images')
+      .upload(path, file)
+    return { data, error }
+  },
+
+  // Get public URL for an uploaded image
+  getPublicUrl: (path: string) => {
+    const { data } = supabase.storage
+      .from('post-images')
+      .getPublicUrl(path)
+    return data.publicUrl
+  },
+
+  // Delete an image from storage
+  deleteImage: async (path: string) => {
+    const { error } = await supabase.storage
+      .from('post-images')
+      .remove([path])
     return { error }
   }
 }

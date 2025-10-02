@@ -9,11 +9,13 @@ import { blogPosts } from '@/lib/supabase-utils'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Button } from '@/components/ui/button'
+import ImageUpload from '@/components/ImageUpload'
 
 export default function CreatePost() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [published, setPublished] = useState(false)
+  const [imageUrl, setImageUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   
@@ -60,7 +62,8 @@ export default function CreatePost() {
         title: title.trim(),
         content: content.trim(),
         author_id: user.id,
-        published
+        published,
+        image_url: imageUrl || undefined
       })
       
       if (error) {
@@ -74,6 +77,14 @@ export default function CreatePost() {
     }
     
     setLoading(false)
+  }
+
+  const handleImageUpload = (url: string) => {
+    setImageUrl(url)
+  }
+
+  const handleImageRemove = () => {
+    setImageUrl('')
   }
 
   return (
@@ -127,6 +138,12 @@ export default function CreatePost() {
                     required
                   />
                 </div>
+                
+                <ImageUpload
+                  onImageUpload={handleImageUpload}
+                  currentImageUrl={imageUrl}
+                  onImageRemove={handleImageRemove}
+                />
                 
                 <div>
                   <label htmlFor="content" className="block text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">

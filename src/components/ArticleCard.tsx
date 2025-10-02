@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Clock, Calendar, User, ArrowRight } from 'lucide-react';
+import { Clock, Calendar, User, ArrowRight, Edit } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { BlogPost } from '@/types/database';
 
 interface ArticleCardProps {
@@ -14,6 +15,8 @@ const ArticleCard = ({
   post,
   featured = false,
 }: ArticleCardProps) => {
+  const { user } = useAuth();
+  
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Date unknown';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -54,8 +57,18 @@ const ArticleCard = ({
         <Link href={`/post/${post.id}`} className="block">
           {/* Hero Image Area with Gradient Overlay */}
           <div className="relative h-[500px] lg:h-[600px] bg-gradient-to-br from-accent/20 via-primary/10 to-accent/30 overflow-hidden">
-            {/* Placeholder for hero image */}
-            <div className="absolute inset-0 bg-gradient-to-br from-stone/20 to-charcoal/20 group-hover:scale-105 transition-transform duration-700" />
+            {/* Display actual image or placeholder */}
+            {post.image_url ? (
+              <Image
+                src={post.image_url}
+                alt={post.title}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                priority
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-stone/20 to-charcoal/20 group-hover:scale-105 transition-transform duration-700" />
+            )}
             
             {/* Content Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -67,6 +80,23 @@ const ArticleCard = ({
                 Featured Story
               </span>
             </div>
+            
+            {/* Edit Button for Author */}
+            {user && post.author_id === user.id && (
+              <div className="absolute top-6 right-6 lg:top-8 lg:right-8">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = `/edit-post/${post.id}`;
+                  }}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full hover:bg-white/30 transition-colors"
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit
+                </button>
+              </div>
+            )}
 
             {/* Main Content */}
             <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-12 text-white">
@@ -116,26 +146,52 @@ const ArticleCard = ({
       <Link href={`/post/${post.id}`} className="block">
         {/* Thumbnail */}
         <div className="relative h-56 lg:h-64 overflow-hidden bg-gradient-to-br from-accent/10 via-whisper to-accent/5">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <div className="w-10 h-10 bg-accent/40 rounded-full"></div>
+          {post.image_url ? (
+            <Image
+              src={post.image_url}
+              alt={post.title}
+              fill
+              className="object-cover group-hover:scale-110 transition-transform duration-300"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <div className="w-10 h-10 bg-accent/40 rounded-full"></div>
+              </div>
             </div>
-          </div>
+          )}
           {/* Image zoom effect overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
         
         {/* Content */}
         <div className="p-6 lg:p-8">
-          {/* Category/Type Badge */}
-          <div className="mb-4">
-            <span className="inline-block px-3 py-1 bg-secondary text-secondary-foreground text-xs font-semibold uppercase tracking-wider rounded-full">
-              Article
-            </span>
-            {!post.published && (
-              <span className="ml-2 bg-warning/20 text-warning px-3 py-1 rounded-full text-xs font-medium">
-                Draft
+          {/* Category/Type Badge and Edit Button */}
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <span className="inline-block px-3 py-1 bg-secondary text-secondary-foreground text-xs font-semibold uppercase tracking-wider rounded-full">
+                Article
               </span>
+              {!post.published && (
+                <span className="ml-2 bg-warning/20 text-warning px-3 py-1 rounded-full text-xs font-medium">
+                  Draft
+                </span>
+              )}
+            </div>
+            
+            {/* Edit Button for Author */}
+            {user && post.author_id === user.id && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.location.href = `/edit-post/${post.id}`;
+                }}
+                className="inline-flex items-center gap-1 px-2 py-1 text-muted-foreground hover:text-accent text-xs font-medium rounded transition-colors"
+              >
+                <Edit className="h-3 w-3" />
+                Edit
+              </button>
             )}
           </div>
           

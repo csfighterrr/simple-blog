@@ -20,20 +20,23 @@ export interface BlogPost {
   id: string
   title: string
   content: string
-  author_id: string | null
-  created_at: string | null
-  updated_at: string | null
-  published: boolean | null
+  author_id: string
+  created_at: string
+  updated_at: string
+  published: boolean
+  image_url?: string
   author?: {
     id: string
     email: string
   }
-  profile?: Profile
   profiles?: {
-    id: string
-    display_name: string | null
-    avatar_url: string | null
-  } | null
+    display_name?: string
+    avatar_url?: string
+  }
+  profile?: {
+    display_name?: string
+    avatar_url?: string
+  }
 }
 
 export interface Comment {

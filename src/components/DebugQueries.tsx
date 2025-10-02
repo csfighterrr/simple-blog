@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export default function DebugQueries() {
-  const [results, setResults] = useState<any>({})
+  const [results, setResults] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
     testQueries()
   }, [])
 
   const testQueries = async () => {
-    const tests: any = {}
+    const newResults: Record<string, unknown> = {}
 
     // Test 1: Get posts without join
     try {
@@ -20,14 +20,14 @@ export default function DebugQueries() {
         .select('*')
         .limit(5)
       
-      tests.postsOnly = { 
+      newResults.postsOnly = { 
         success: !postsError, 
         error: postsError?.message,
         count: posts?.length || 0,
         data: posts?.[0] || null
       }
-    } catch (err: any) {
-      tests.postsOnly = { success: false, error: err.message }
+    } catch (err: unknown) {
+      newResults.postsOnly = { success: false, error: (err as Error).message }
     }
 
     // Test 2: Get profiles
@@ -37,14 +37,14 @@ export default function DebugQueries() {
         .select('*')
         .limit(5)
       
-      tests.profilesOnly = { 
+      newResults.profilesOnly = { 
         success: !profilesError, 
         error: profilesError?.message,
         count: profiles?.length || 0,
         data: profiles?.[0] || null
       }
-    } catch (err: any) {
-      tests.profilesOnly = { success: false, error: err.message }
+    } catch (err: unknown) {
+      newResults.profilesOnly = { success: false, error: (err as Error).message }
     }
 
     // Test 3: Join with automatic detection
@@ -61,14 +61,14 @@ export default function DebugQueries() {
         `)
         .limit(5)
       
-      tests.automaticJoin = { 
+      newResults.automaticJoin = { 
         success: !joinError, 
         error: joinError?.message,
         count: postsWithProfiles?.length || 0,
         data: postsWithProfiles?.[0] || null
       }
-    } catch (err: any) {
-      tests.automaticJoin = { success: false, error: err.message }
+    } catch (err: unknown) {
+      newResults.automaticJoin = { success: false, error: (err as Error).message }
     }
 
     // Test 4: Join with explicit foreign key
@@ -85,41 +85,44 @@ export default function DebugQueries() {
         `)
         .limit(5)
       
-      tests.explicitJoin = { 
+      newResults.explicitJoin = { 
         success: !joinError2, 
         error: joinError2?.message,
         count: postsWithProfiles2?.length || 0,
         data: postsWithProfiles2?.[0] || null
       }
-    } catch (err: any) {
-      tests.explicitJoin = { success: false, error: err.message }
+    } catch (err: unknown) {
+      newResults.explicitJoin = { success: false, error: (err as Error).message }
     }
 
-    setResults(tests)
+    setResults(newResults)
   }
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-bold mb-6">Database Query Debug</h1>
       
-      {Object.entries(results).map(([testName, result]: [string, any]) => (
+      {Object.entries(results).map(([testName, result]) => {
+        const testResult = result as { success: boolean; error?: string; count?: number; data?: unknown }
+        return (
         <div key={testName} className="mb-6 p-4 bg-white rounded shadow">
           <h2 className="text-lg font-semibold mb-2">{testName}</h2>
-          <div className={`p-2 rounded ${result.success ? 'bg-green-100' : 'bg-red-100'}`}>
-            <p><strong>Success:</strong> {result.success ? 'Yes' : 'No'}</p>
-            {result.error && <p><strong>Error:</strong> {result.error}</p>}
-            <p><strong>Count:</strong> {result.count}</p>
-            {result.data && (
+          <div className={`p-2 rounded ${testResult.success ? 'bg-green-100' : 'bg-red-100'}`}>
+            <p><strong>Success:</strong> {testResult.success ? 'Yes' : 'No'}</p>
+            {testResult.error && <p><strong>Error:</strong> {testResult.error}</p>}
+            <p><strong>Count:</strong> {testResult.count}</p>
+            {testResult.data && typeof testResult.data === 'object' && (
               <details className="mt-2">
                 <summary>Sample Data</summary>
                 <pre className="bg-gray-100 p-2 rounded mt-2 text-xs overflow-auto">
-                  {JSON.stringify(result.data, null, 2)}
+                  {JSON.stringify(testResult.data, null, 2)}
                 </pre>
               </details>
             )}
           </div>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

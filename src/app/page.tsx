@@ -25,7 +25,7 @@ export default function Home() {
     } else {
       // Filter to show only published posts for non-authenticated users
       const filteredPosts = user ? (data || []) : (data || []).filter(post => post.published)
-      setPosts(filteredPosts)
+      setPosts(filteredPosts as BlogPost[])
     }
     
     setLoading(false)
