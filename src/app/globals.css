@@ -1,17 +1,15 @@
 @import "tailwindcss";
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Sophisticated Blog Website Design System */
 
 @layer base {
   :root {
-    /* Primary Colors */
+    /* Primary Colors - Near-black and warm white */
     --primary-black: 240 3% 4%;           /* #0A0A0B */
     --primary-white: 0 0% 98%;            /* #FAFAFA */
     --accent-gold: 43 77% 38%;            /* #B8860B */
     
-    /* Secondary Colors */
+    /* Secondary Colors - Charcoal and grays */
     --charcoal: 240 3% 18%;               /* #2C2C2E */
     --stone-gray: 220 9% 46%;             /* #6B7280 */
     --light-gray: 220 13% 91%;            /* #E5E7EB */
@@ -23,6 +21,32 @@ All colors MUST be HSL.
     --success-green: 160 84% 39%;         /* #059669 */
     --warning-amber: 25 95% 43%;          /* #D97706 */
     --error-red: 0 72% 51%;               /* #DC2626 */
+    
+    /* Typography Scale */
+    --text-xs: 0.75rem;      /* 12px - Meta text */
+    --text-sm: 0.875rem;     /* 14px - Captions */
+    --text-base: 1rem;       /* 16px - Base */
+    --text-lg: 1.125rem;     /* 18px - Body text */
+    --text-xl: 1.25rem;      /* 20px - Lead text */
+    --text-2xl: 1.5rem;      /* 24px - H4 */
+    --text-3xl: 1.875rem;    /* 30px - H3 */
+    --text-4xl: 2.25rem;     /* 36px - H2 */
+    --text-5xl: 3rem;        /* 48px - H1 */
+    --text-6xl: 3.75rem;     /* 60px - Hero */
+    
+    /* Line Heights */
+    --leading-tight: 1.25;    /* Headlines */
+    --leading-normal: 1.5;    /* UI elements */
+    --leading-relaxed: 1.75;  /* Body text */
+    --leading-loose: 2;       /* Prose */
+    
+    /* Font Weights */
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-black: 900;
     
     /* Semantic tokens for components */
     --background: var(--primary-white);
@@ -55,7 +79,7 @@ All colors MUST be HSL.
     
     --radius: 0.5rem;
     
-    /* Spacing system */
+    /* Spacing system - 8px base unit */
     --space-1: 0.5rem;   /* 8px */
     --space-2: 1rem;     /* 16px */
     --space-3: 1.5rem;   /* 24px */
@@ -66,8 +90,16 @@ All colors MUST be HSL.
     --space-10: 5rem;    /* 80px */
     --space-12: 6rem;    /* 96px */
     --space-16: 8rem;    /* 128px */
+    
+    /* Grid System */
+    --container-max-width: 1440px;
+    --content-width: 720px;
+    --gutter-desktop: 32px;
+    --gutter-tablet: 24px;
+    --gutter-mobile: 16px;
   }
 
+  /* Dark Mode Palette */
   .dark {
     --background: 240 6% 6%;              /* #0F0F10 */
     --foreground: 240 5% 90%;             /* #E5E5E7 */
@@ -96,27 +128,215 @@ All colors MUST be HSL.
     border-color: hsl(var(--border));
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: var(--font-body), system-ui, sans-serif;
+    font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   
+  /* Typography Hierarchy */
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading), Georgia, serif;
-    font-weight: 600;
+    font-family: var(--font-heading), "Playfair Display", Georgia, serif;
+    font-weight: var(--font-semibold);
+    line-height: var(--leading-tight);
+    color: hsl(var(--foreground));
   }
   
-  /* Reading optimizations */
+  h1 {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-bold);
+  }
+  
+  h2 {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-semibold);
+  }
+  
+  h3 {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-semibold);
+  }
+  
+  h4 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-medium);
+  }
+  
+  /* Body text optimization for reading */
+  p {
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-3);
+  }
+  
+  /* Article content optimization */
   article {
-    font-size: 1.125rem;
-    line-height: 1.75;
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    max-width: var(--content-width);
   }
   
-  /* Smooth transitions */
-  a, button {
+  article h2 {
+    margin-top: var(--space-6);
+    margin-bottom: var(--space-4);
+  }
+  
+  article h3 {
+    margin-top: var(--space-5);
+    margin-bottom: var(--space-3);
+  }
+  
+  article p {
+    margin-bottom: var(--space-4);
+  }
+  
+  /* Drop cap for article first paragraph */
+  article > p:first-of-type::first-letter {
+    float: left;
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    line-height: 3rem;
+    padding-right: 0.5rem;
+    padding-top: 0.25rem;
+    color: hsl(var(--accent));
+  }
+  
+  /* Pull quotes */
+  blockquote {
+    font-size: var(--text-xl);
+    font-style: italic;
+    margin: var(--space-6) 0;
+    padding-left: var(--space-4);
+    border-left: 4px solid hsl(var(--accent));
+    color: hsl(var(--muted-foreground));
+  }
+  
+  /* Links */
+  a {
+    color: hsl(var(--link-blue));
+    text-decoration: none;
+    text-underline-offset: 4px;
     transition: all 0.2s ease;
+  }
+  
+  a:hover {
+    color: hsl(var(--link-hover));
+    text-decoration: underline;
+  }
+  
+  /* Buttons and Interactive Elements */
+  button, [role="button"] {
+    transition: all 0.2s ease;
+    border-radius: 6px;
+  }
+  
+  /* Form Elements */
+  input, textarea, select {
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    border-radius: 8px;
+    border: 1px solid hsl(var(--border));
+    transition: all 0.2s ease;
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: hsl(var(--accent));
+    box-shadow: 0 0 0 2px hsl(var(--accent) / 0.2);
+  }
+  
+  /* Reading experience optimizations */
+  .reading-content {
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    color: hsl(var(--foreground));
+  }
+  
+  .reading-content img {
+    margin: var(--space-6) 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Responsive typography */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: var(--text-4xl);
+    }
+    
+    h2 {
+      font-size: var(--text-3xl);
+    }
+    
+    h3 {
+      font-size: var(--text-2xl);
+    }
+    
+    p, article {
+      font-size: var(--text-base);
+    }
+    
+    article > p:first-of-type::first-letter {
+      font-size: 2.5rem;
+      line-height: 2rem;
+    }
+  }
+  
+  /* Animations and Micro-interactions */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  .image-zoom {
+    transition: transform 0.3s ease;
+  }
+  
+  .image-zoom:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  
+  /* Focus indicators */
+  :focus-visible {
+    outline: 2px solid hsl(var(--accent));
+    outline-offset: 2px;
+  }
+  
+  /* Skip links for accessibility */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 1000;
+  }
+  
+  .skip-link:focus {
+    top: 6px;
   }
 }
