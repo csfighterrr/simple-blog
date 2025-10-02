@@ -68,9 +68,14 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Latest Articles</h2>
+      <main className="max-w-4xl mx-auto px-4 py-8 ">
+       <div className="w-full border-t border-b border-black py-12 flex items-center justify-center mb-8">
+          <h1 className="font-inter font-bold text-[50px] md:text-[80px] lg:text-[144px] leading-none tracking-tight text-center text-black uppercase">
+            THE BLOG
+          </h1>
+        </div>
+        <div className="mb-8 ">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Recent blog post</h2>
           <p className="text-gray-600">
             Discover interesting articles and insights from our authors.
           </p>
