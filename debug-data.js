@@ -1,12 +1,7 @@
 const { createClient } = require('@supabase/supabase-js')
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseKey) {
-  console.log('Please check your .env.local file for Supabase credentials')
-  process.exit(1)
-}
+const supabaseUrl = 'https://inrdkkelbzjztonoaacs.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlucmRra2VsYnpqenRvbm9hYWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzODIyMjgsImV4cCI6MjA3NDk1ODIyOH0.f8Q-ZMCkhgN1EX09S9bHwxKAAgG0mP0XhzfbTHy8Nyg'
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
@@ -22,36 +17,26 @@ async function debugData() {
         avatar_url
       )
     `)
-    .limit(3)
+    .limit(10)
   
   if (postsError) {
     console.error('Posts error:', postsError)
   } else {
     console.log('Posts data:', JSON.stringify(posts, null, 2))
+    console.log('Number of posts:', posts?.length || 0)
   }
 
   console.log('\n=== PROFILES DATA ===')
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
     .select('*')
-    .limit(3)
+    .limit(10)
   
   if (profilesError) {
     console.error('Profiles error:', profilesError)
   } else {
     console.log('Profiles data:', JSON.stringify(profiles, null, 2))
-  }
-
-  console.log('\n=== AUTH USERS DATA ===')
-  const { data: users, error: usersError } = await supabase
-    .from('auth.users')
-    .select('id, email')
-    .limit(3)
-  
-  if (usersError) {
-    console.error('Users error:', usersError)
-  } else {
-    console.log('Users data:', JSON.stringify(users, null, 2))
+    console.log('Number of profiles:', profiles?.length || 0)
   }
 }
 

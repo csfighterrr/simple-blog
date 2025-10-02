@@ -82,7 +82,58 @@ export const blogPosts = {
         )
       `)
       .order('created_at', { ascending: false })
+    
+    // If the automatic relationship doesn't work, use fallback method
+    if (error || !data || data.some(post => !post.profiles)) {
+      console.log('Using fallback method for fetching posts with profiles')
+      return await blogPosts.getAllFallback()
+    }
+    
     return { data, error }
+  },
+
+  // Fallback method using separate queries
+  getAllFallback: async () => {
+    // First get all posts
+    const { data: posts, error: postsError } = await supabase
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (postsError) {
+      return { data: null, error: postsError }
+    }
+
+    if (!posts || posts.length === 0) {
+      return { data: [], error: null }
+    }
+
+    // Get all unique author IDs (filter out null values)
+    const authorIds = [...new Set(posts.map(post => post.author_id).filter(id => id !== null))] as string[]
+
+    // Get all profiles for these authors
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, display_name, avatar_url')
+      .in('id', authorIds)
+
+    if (profilesError) {
+      return { data: null, error: profilesError }
+    }
+
+    // Create a map of profiles by ID for quick lookup
+    const profileMap = new Map()
+    profiles?.forEach(profile => {
+      profileMap.set(profile.id, profile)
+    })
+
+    // Combine posts with their author profiles
+    const postsWithProfiles = posts.map(post => ({
+      ...post,
+      profiles: profileMap.get(post.author_id) || null
+    }))
+
+    return { data: postsWithProfiles, error: null }
   },
 
   // Get a single blog post by ID (trying automatic relationship detection)
@@ -100,7 +151,47 @@ export const blogPosts = {
       `)
       .eq('id', id)
       .single()
+    
+    // If the automatic relationship doesn't work or profile is missing, use fallback
+    if (error || !data || !data.profiles) {
+      console.log('Using fallback method for fetching single post with profile')
+      return await blogPosts.getByIdFallback(id)
+    }
+    
     return { data, error }
+  },
+
+  // Fallback method for getById
+  getByIdFallback: async (id: string) => {
+    // First get the post
+    const { data: post, error: postError } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (postError) {
+      return { data: null, error: postError }
+    }
+
+    if (!post || !post.author_id) {
+      return { data: null, error: { message: 'Post not found or missing author' } }
+    }
+
+    // Get the profile for this author
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, display_name, avatar_url, bio')
+      .eq('id', post.author_id)
+      .single()
+
+    // Combine post with profile (even if profile is null)
+    const postWithProfile = {
+      ...post,
+      profiles: profile || null
+    }
+
+    return { data: postWithProfile, error: null }
   },
 
   // Create a new blog post
@@ -126,51 +217,6 @@ export const blogPosts = {
   remove: async (id: string) => {
     const { error } = await supabase
       .from('posts')
-      .delete()
-      .eq('id', id)
-    return { error }
-  }
-}
-
-// Generic database functions
-export const database = {
-  // Generic select function
-  select: async (table: string, columns: string = '*', filters?: Record<string, unknown>) => {
-    let query = supabase.from(table).select(columns)
-    
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        query = query.eq(key, value)
-      })
-    }
-    
-    const { data, error } = await query
-    return { data, error }
-  },
-
-  // Generic insert function
-  insert: async (table: string, data: Record<string, unknown>) => {
-    const { data: result, error } = await supabase
-      .from(table)
-      .insert([data])
-      .select()
-    return { data: result, error }
-  },
-
-  // Generic update function
-  update: async (table: string, id: string, updates: Record<string, unknown>) => {
-    const { data, error } = await supabase
-      .from(table)
-      .update(updates)
-      .eq('id', id)
-      .select()
-    return { data, error }
-  },
-
-  // Generic delete function
-  remove: async (table: string, id: string) => {
-    const { error } = await supabase
-      .from(table)
       .delete()
       .eq('id', id)
     return { error }

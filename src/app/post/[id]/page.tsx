@@ -46,8 +46,28 @@ export default function PostPage() {
     });
   };
 
-  const getAuthorName = (email?: string) => {
-    return email ? email.split('@')[0] : 'Anonymous';
+  const getAuthorName = (post?: BlogPost | null) => {
+    if (!post) return 'Unknown Author';
+    
+    // First priority: display_name from profiles relationship
+    if (post.profiles?.display_name) {
+      return post.profiles.display_name;
+    }
+    if (post.profile?.display_name) {
+      return post.profile.display_name;
+    }
+    
+    // Second priority: Try to get email from author object
+    if (post.author?.email) {
+      return post.author.email.split('@')[0];
+    }
+    
+    // Third priority: If we have author_id, we can try to derive from that
+    if (post.author_id) {
+      return `User ${post.author_id.slice(0, 8)}`;
+    }
+    
+    return 'Unknown Author';
   };
 
   const getReadingTime = (content: string) => {
@@ -135,7 +155,7 @@ export default function PostPage() {
               <div className="flex flex-wrap items-center justify-center gap-6 text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  <span>{getAuthorName(post.author?.email)}</span>
+                  <span>{getAuthorName(post)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -188,7 +208,7 @@ export default function PostPage() {
               <div>
                 <h3 className="font-heading font-semibold mb-2">About the Author</h3>
                 <p className="text-muted-foreground">
-                  Written by {getAuthorName(post.author?.email)}
+                  Written by {getAuthorName(post)}
                 </p>
               </div>
               <div className="text-right">

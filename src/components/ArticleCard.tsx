@@ -27,16 +27,28 @@ const ArticleCard = ({
   };
 
   const getAuthorName = (post: BlogPost) => {
+    // First priority: display_name from profiles relationship
     if (post.profiles?.display_name) {
       return post.profiles.display_name;
     }
     if (post.profile?.display_name) {
       return post.profile.display_name;
     }
+    
+    // Second priority: Try to get email from author object
     if (post.author?.email) {
       return post.author.email.split('@')[0];
     }
-    return 'Anonymous Author';
+    
+    // Third priority: If we have author_id, we can try to derive from that
+    // This would be a username extracted from the user ID pattern if available
+    if (post.author_id) {
+      // This could be enhanced to fetch user data if needed
+      return `User ${post.author_id.slice(0, 8)}`;
+    }
+    
+    // Last resort fallback
+    return 'Unknown Author';
   };
 
   const getExcerpt = (content: string, maxLength: number = 200) => {
