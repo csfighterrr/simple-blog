@@ -30,7 +30,7 @@ export default function LoginForm() {
       <h2 className="text-2xl font-bold mb-6 text-center">Sign In</h2>
       
       {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-3 bg-red-100 border border-red-600 text-red-600 rounded">
           {error}
         </div>
       )}
@@ -66,7 +66,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-2 focus:outline-white focus:outline-offset-2 disabled:opacity-50"
       >
         {loading ? 'Signing In...' : 'Sign In'}
       </button>

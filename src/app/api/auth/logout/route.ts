@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
 // POST /api/auth/logout - User logout
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const { error } = await supabase.auth.signOut()
     
@@ -26,6 +26,6 @@ export async function POST(request: NextRequest) {
 }
 
 // GET /api/auth/logout - Also support GET for logout links
-export async function GET(request: NextRequest) {
-  return POST(request)
+export async function GET() {
+  return POST()
 }

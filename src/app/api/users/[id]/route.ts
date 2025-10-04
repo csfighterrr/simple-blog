@@ -46,7 +46,7 @@ export async function GET(
     }
     
     // Get user's post count
-    const { count: postCount, error: countError } = await supabase
+    const { count: postCount } = await supabase
       .from('posts')
       .select('*', { count: 'exact', head: true })
       .eq('author_id', userId)
@@ -92,7 +92,13 @@ export async function PUT(
     const { display_name, bio, website, avatar_url } = body
     
     // Build update object with only provided fields
-    const updateData: any = {}
+    const updateData: Partial<{
+      display_name: string;
+      bio: string;
+      website: string;
+      avatar_url: string;
+      updated_at: string;
+    }> = {}
     if (display_name !== undefined) updateData.display_name = display_name
     if (bio !== undefined) updateData.bio = bio
     if (website !== undefined) updateData.website = website
