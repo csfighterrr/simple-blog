@@ -3,62 +3,62 @@ import { supabase } from '@/lib/supabase'
 import { verifyAdminAuth } from '@/lib/auth-utils'
 
 // GET /api/posts - Fetch all posts
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const published = searchParams.get('published')
-    const author = searchParams.get('author')
+// export async function GET(request: NextRequest) {
+//   try {
+//     const { searchParams } = new URL(request.url)
+//     const page = parseInt(searchParams.get('page') || '1')
+//     const limit = parseInt(searchParams.get('limit') || '10')
+//     const published = searchParams.get('published')
+//     const author = searchParams.get('author')
     
-    const offset = (page - 1) * limit
+//     const offset = (page - 1) * limit
     
-    let query = supabase
-      .from('posts')
-      .select(`
-        *,
-        profiles:author_id(id, display_name)
-      `)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+//     let query = supabase
+//       .from('posts')
+//       .select(`
+//         *,
+//         profiles:author_id(id, display_name)
+//       `)
+//       .order('created_at', { ascending: false })
+//       .range(offset, offset + limit - 1)
     
-    // Filter by published status if specified
-    if (published !== null) {
-      query = query.eq('published', published === 'true')
-    }
+//     // Filter by published status if specified
+//     if (published !== null) {
+//       query = query.eq('published', published === 'true')
+//     }
     
-    // Filter by author if specified
-    if (author) {
-      query = query.eq('author_id', author)
-    }
+//     // Filter by author if specified
+//     if (author) {
+//       query = query.eq('author_id', author)
+//     }
     
-    const { data: posts, error, count } = await query
+//     const { data: posts, error, count } = await query
     
-    if (error) {
-      console.error('Error fetching posts:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch posts', details: error.message },
-        { status: 500 }
-      )
-    }
+//     if (error) {
+//       console.error('Error fetching posts:', error)
+//       return NextResponse.json(
+//         { error: 'Failed to fetch posts', details: error.message },
+//         { status: 500 }
+//       )
+//     }
     
-    return NextResponse.json({
-      posts: posts || [],
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        hasMore: (count || 0) > offset + limit
-      }
-    })
-  } catch (error) {
-    console.error('Unexpected error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
+//     return NextResponse.json({
+//       posts: posts || [],
+//       pagination: {
+//         page,
+//         limit,
+//         total: count || 0,
+//         hasMore: (count || 0) > offset + limit
+//       }
+//     })
+//   } catch (error) {
+//     console.error('Unexpected error:', error)
+//     return NextResponse.json(
+//       { error: 'Internal server error' },
+//       { status: 500 }
+//     )
+//   }
+// }
 
 // POST /api/posts - Create a new post (ADMIN ONLY)
 export async function POST(request: NextRequest) {
